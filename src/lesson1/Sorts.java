@@ -124,15 +124,24 @@ public class Sorts {
         quickSort(elements, 0, elements.length - 1);
     }
 
-    private static <T extends Comparable<T>> int part(List<T> elements, int min, int max) {
+    private static <T extends Comparable<T>> int part(List<T> elements, int min, int max, boolean address) {
         T x = elements.get(min + random.nextInt(max - min + 1));
         int left = min, right = max;
         while (left <= right) {
-            while (elements.get(left).compareTo(x) < 0) {
-                left++;
-            }
-            while (elements.get(right).compareTo(x) > 0) {
-                right--;
+            if (address) {
+                while (compareAddress((String) elements.get(left), (String) x) < 0) {
+                    left++;
+                }
+                while (compareAddress((String) elements.get(right), (String) x) > 0) {
+                    right--;
+                }
+            } else {
+                while (elements.get(left).compareTo(x) < 0) {
+                    left++;
+                }
+                while (elements.get(right).compareTo(x) > 0) {
+                    right--;
+                }
             }
             if (left <= right) {
                 T temp = elements.get(left);
@@ -145,16 +154,16 @@ public class Sorts {
         return right;
     }
 
-    private static <T extends Comparable<T>> void qckSort(List<T> elements, int min, int max) {
+    private static <T extends Comparable<T>> void qckSort(List<T> elements, int min, int max, boolean address) {
         if (min < max) {
-            int border = part(elements, min, max);
-            qckSort(elements, min, border);
-            qckSort(elements, border + 1, max);
+            int border = part(elements, min, max, address);
+            qckSort(elements, min, border, address);
+            qckSort(elements, border + 1, max, address);
         }
     }
 
-    public static <T extends Comparable<T>> void qckSort(List<T> elements) {
-        qckSort(elements, 0, elements.size() - 1);
+    public static <T extends Comparable<T>> void qckSort(List<T> elements, boolean address) {
+        qckSort(elements, 0, elements.size() - 1, address);
     }
 
     public static int[] countingSort(int[] elements, int limit) {
@@ -171,5 +180,14 @@ public class Sorts {
             count[elements[j]]--;
         }
         return out;
+    }
+
+    public static int compareAddress(String first, String second){
+        if (first.split(" ")[0].compareTo(second.split(" ")[0]) > 0) return 1;
+        else if (first.split(" ")[0].compareTo(second.split(" ")[0]) == 0) {
+            if (Integer.parseInt(first.split(" ")[1]) > Integer.parseInt(second.split(" ")[1])) return 1;
+            else if (Integer.parseInt(first.split(" ")[1]) == Integer.parseInt(second.split(" ")[1])) return 0;
+            else return -1;
+        } else return -1;
     }
 }

@@ -74,11 +74,11 @@ public class JavaTasks {
         String line;
         while ((line = buffer.readLine()) != null) {
             List<String> list = new ArrayList<>();
-            if (line.matches("([А-Я][а-я]*\\s+)+\\s+-\\s+[А-Я][а-я]*\\s+\\d+"))
+            if (line.matches("([A-ZА-ЯЁa-zа-яё]+\\s*)+-\\s+([A-ZА-ЯЁa-zа-яё-]+\\s*)+\\d+"))
             {
                 String trim = line.replaceAll("\\s+", " ").trim();
-                String person = trim.split("-")[0].trim();
-                String address = trim.split("-")[1].trim();
+                String person = trim.split(" - ")[0].trim();
+                String address = trim.split(" - ")[1].trim();
                 if (map.get(address) == null) {
                     list.add(person);
                     map.put(address, list);
@@ -87,14 +87,24 @@ public class JavaTasks {
                     list.add(person);
                     map.put(address,list);
                 }
-            }
+            } else throw new NumberFormatException("Некорректный ввод.");
         }
 
-        String[] addressArray = map.keySet().toArray(new String[map.keySet().size()]);
-        List<String> addressList = new ArrayList<>(Arrays.asList(addressArray));
-        Sorts.qckSort(addressList);
+        List<String> addressList = new ArrayList<>(Arrays.asList(map.keySet().toArray(new String[map.keySet().size()])));
+        Sorts.qckSort(addressList, true);
 
-        System.out.println(addressList);
+        for (int i = 0; i < addressList.size(); i++) {
+            String str = addressList.get(i) + " - ";
+            List<String> nameList = new ArrayList<>(map.get(addressList.get(i)));
+            Sorts.qckSort(nameList, false);
+            for (int j = 0; j < nameList.size(); j++) {
+                if (j != nameList.size() - 1) str += nameList.get(j) + ", "; else str += nameList.get(j);
+            }
+            writer.write(str);
+            writer.newLine();
+        }
+        buffer.close();
+        writer.close();
     }
 
     /**
