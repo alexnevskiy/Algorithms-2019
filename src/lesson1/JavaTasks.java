@@ -92,7 +92,7 @@ public class JavaTasks {
 
         String[] addressArray = map.keySet().toArray(new String[map.keySet().size()]);
         List<String> addressList = new ArrayList<>(Arrays.asList(addressArray));
-        Sorts.quickSort(addressList);
+        Sorts.qckSort(addressList);
 
         System.out.println(addressList);
     }

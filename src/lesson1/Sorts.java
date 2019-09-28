@@ -91,20 +91,20 @@ public class Sorts {
 
     private static final Random random = new Random(Calendar.getInstance().getTimeInMillis());
 
-    private static <T extends Comparable<T>> int partition(List<T> elements, int min, int max) {
-        T x = elements.get(min + random.nextInt(max - min + 1));
+    private static int partition(int[] elements, int min, int max) {
+        int x = elements[min + random.nextInt(max - min + 1)];
         int left = min, right = max;
         while (left <= right) {
-            while (elements.get(left).compareTo(x) < 0) {
+            while (elements[left] < x) {
                 left++;
             }
-            while (elements.get(right).compareTo(x) > 0) {
+            while (elements[right] > x) {
                 right--;
             }
             if (left <= right) {
-                T temp = elements.get(left);
-                elements.set(left, elements.get(right));
-                elements.set(right, temp);
+                int temp = elements[left];
+                elements[left] = elements[right];
+                elements[right] = temp;
                 left++;
                 right--;
             }
@@ -112,7 +112,7 @@ public class Sorts {
         return right;
     }
 
-    private static <T extends Comparable<T>> void quickSort(List<T> elements, int min, int max) {
+    private static void quickSort(int[] elements, int min, int max) {
         if (min < max) {
             int border = partition(elements, min, max);
             quickSort(elements, min, border);
@@ -120,8 +120,8 @@ public class Sorts {
         }
     }
 
-    public static <T extends Comparable<T>> void quickSort(List<T> elements) {
-        quickSort(elements, 0, elements.size() - 1);
+    public static void quickSort(int[] elements) {
+        quickSort(elements, 0, elements.length - 1);
     }
 
     private static <T extends Comparable<T>> int part(List<T> elements, int min, int max) {
