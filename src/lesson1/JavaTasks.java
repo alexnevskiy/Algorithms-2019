@@ -2,6 +2,9 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.util.*;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -64,8 +67,34 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortAddresses(String inputName, String outputName) {
-        throw new NotImplementedError();
+    static public void sortAddresses(String inputName, String outputName) throws IOException {
+        Map<String, List<String>> map = new HashMap<>();
+        BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputName)));
+        String line;
+        while ((line = buffer.readLine()) != null) {
+            List<String> list = new ArrayList<>();
+            if (line.matches("([А-Я][а-я]*\\s+)+\\s+-\\s+[А-Я][а-я]*\\s+\\d+"))
+            {
+                String trim = line.replaceAll("\\s+", " ").trim();
+                String person = trim.split("-")[0].trim();
+                String address = trim.split("-")[1].trim();
+                if (map.get(address) == null) {
+                    list.add(person);
+                    map.put(address, list);
+                } else {
+                    list = map.get(address);
+                    list.add(person);
+                    map.put(address,list);
+                }
+            }
+        }
+
+        String[] addressArray = map.keySet().toArray(new String[map.keySet().size()]);
+        List<String> addressList = new ArrayList<>(Arrays.asList(addressArray));
+        Sorts.quickSort(addressList);
+
+        System.out.println(addressList);
     }
 
     /**
