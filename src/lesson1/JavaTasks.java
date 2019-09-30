@@ -70,9 +70,9 @@ public class JavaTasks {
     static public void sortAddresses(String inputName, String outputName) throws IOException {
         Map<String, List<String>> map = new HashMap<>();
         BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(outputName)));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));
         String line;
-        while ((line = buffer.readLine()) != null) {
+        while ((line = buffer.readLine()) != null) {  //  T=O(line), line - количество строк в файле
             List<String> list = new ArrayList<>();
             if (line.matches("([A-ZА-ЯЁa-zа-яё]+\\s*)+-\\s+([A-ZА-ЯЁa-zа-яё-]+\\s*)+\\d+"))
             {
@@ -91,21 +91,23 @@ public class JavaTasks {
         }
 
         List<String> addressList = new ArrayList<>(Arrays.asList(map.keySet().toArray(new String[map.keySet().size()])));
-        Sorts.qckSort(addressList, true);
+        Sorts.qckSort(addressList, true);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
 
-        for (int i = 0; i < addressList.size(); i++) {
-            String str = addressList.get(i) + " - ";
-            List<String> nameList = new ArrayList<>(map.get(addressList.get(i)));
-            Sorts.qckSort(nameList, false);
-            for (int j = 0; j < nameList.size(); j++) {
-                if (j != nameList.size() - 1) str += nameList.get(j) + ", "; else str += nameList.get(j);
+        for (String anAddressList : addressList) {  //  T=O(address) address - количество адресов в листе
+            StringBuilder str = new StringBuilder(anAddressList + " - ");
+            List<String> nameList = new ArrayList<>(map.get(anAddressList));
+            Sorts.qckSort(nameList, false);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
+            for (int j = 0; j < nameList.size(); j++) {  //  T=O(name) name - количество имён в листе
+                if (j != nameList.size() - 1) str.append(nameList.get(j)).append(", ");
+                else str.append(nameList.get(j));
             }
-            writer.write(str);
+            writer.write(str.toString());
             writer.newLine();
         }
+
         buffer.close();
         writer.close();
-    }
+    }  //  Вывод: T=O(n*log(n)), R=O(n)
 
     /**
      * Сортировка температур
@@ -137,9 +139,23 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
-    }
+    static public void sortTemperatures(String inputName, String outputName) throws IOException {
+        BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));
+        String line;
+        List<Double> list = new ArrayList<>();
+        while ((line = buffer.readLine()) != null) list.add(Double.valueOf(line));
+        //  T=O(line), line - количество строк в файле
+        Sorts.quickSortDouble(list);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
+
+        for (Double aList : list) {  //  T=O(number) number - количество чисел в листе
+            writer.write(aList.toString());
+            writer.newLine();
+        }
+
+        buffer.close();
+        writer.close();
+    }  //  Вывод: T=O(n*log(n)), R=O(n)
 
     /**
      * Сортировка последовательности

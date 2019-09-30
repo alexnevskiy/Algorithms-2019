@@ -190,4 +190,37 @@ public class Sorts {
             else return -1;
         } else return -1;
     }
+
+    private static int partitionDouble(List<Double> elements, int min, int max) {
+        double x = elements.get(min + random.nextInt(max - min + 1));
+        int left = min, right = max;
+        while (left <= right) {
+            while (elements.get(left).compareTo(x) < 0) {
+                left++;
+            }
+            while (elements.get(right).compareTo(x) > 0) {
+                right--;
+            }
+            if (left <= right) {
+                double temp = elements.get(left);
+                elements.set(left, elements.get(right));
+                elements.set(right, temp);
+                left++;
+                right--;
+            }
+        }
+        return right;
+    }
+
+    private static void quickSortDouble(List<Double> elements, int min, int max) {
+        if (min < max) {
+            int border = partitionDouble(elements, min, max);
+            quickSortDouble(elements, min, border);
+            quickSortDouble(elements, border + 1, max);
+        }
+    }
+
+    public static void quickSortDouble(List<Double> elements) {
+        quickSortDouble(elements, 0, elements.size() - 1);
+    }
 }
