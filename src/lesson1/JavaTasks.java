@@ -143,19 +143,20 @@ public class JavaTasks {
         BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));
         BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));
         String line;
-        List<Double> list = new ArrayList<>();
-        while ((line = buffer.readLine()) != null) list.add(Double.valueOf(line));
+        int[] tempArray = new int[77300];
+        while ((line = buffer.readLine()) != null) tempArray[(int)(Double.parseDouble(line) * 10) + 2730]++;
         //  T=O(line), line - количество строк в файле
-        Sorts.quickSortDouble(list);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
-
-        for (Double aList : list) {  //  T=O(number) number - количество чисел в листе
-            writer.write(aList.toString());
-            writer.newLine();
+        for (int i = 0; i < tempArray.length; i++) {   //  T=O(n)
+            while (tempArray[i] != 0) {
+                writer.write(String.valueOf((double)(i - 2730) / 10));
+                writer.newLine();
+                tempArray[i]--;
+            }
         }
 
         buffer.close();
         writer.close();
-    }  //  Вывод: T=O(n*log(n)), R=O(n)
+    }  //  Вывод: T=O(n), R=O(n)
 
     /**
      * Сортировка последовательности
