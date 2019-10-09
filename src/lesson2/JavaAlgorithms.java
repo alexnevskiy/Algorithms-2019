@@ -99,9 +99,25 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
-    }
+    static public String longestCommonSubstring(String first, String second) {
+        int[][] matrix = new int[first.length()][second.length()];
+        int coincidencesNumber = 0;
+        int lastCharIndex = 0;
+        for (int i = 0; i < first.length(); i++) {  //  T=O(a)
+            for (int j = 0; j < second.length(); j++) {  //  T=O(b)
+                if (first.charAt(i) == second.charAt(j)) {
+                    if (i == 0 || j == 0) matrix[i][j] = 1;
+                    else matrix[i][j] = matrix[i - 1][j - 1] + 1;
+                }
+                if (matrix[i][j] > coincidencesNumber) {
+                    coincidencesNumber = matrix[i][j];
+                    lastCharIndex = i + 1;
+                }
+            }
+        }
+        if (coincidencesNumber == 0) return "";
+        else return first.substring(lastCharIndex - coincidencesNumber, lastCharIndex);
+    }  //  Вывод: T=O(a*b), R=(a*b)
 
     /**
      * Число простых чисел в интервале
