@@ -117,7 +117,7 @@ public class JavaAlgorithms {
         }
         if (coincidencesNumber == 0) return "";
         else return first.substring(lastCharIndex - coincidencesNumber, lastCharIndex);
-    }  //  Вывод: T=O(a*b), R=(a*b)
+    }  //  Вывод: T=O(a*b), R=O(a*b)
 
     /**
      * Число простых чисел в интервале
