@@ -156,7 +156,7 @@ public class JavaTasks {
 
         buffer.close();
         writer.close();
-    }  //  Вывод: T=O(n), R=O(n)
+    }  //  Вывод: T=O(n), R=O(1)
 
     /**
      * Сортировка последовательности
