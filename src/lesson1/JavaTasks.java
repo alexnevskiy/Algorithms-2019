@@ -69,44 +69,43 @@ public class JavaTasks {
      */
     static public void sortAddresses(String inputName, String outputName) throws IOException {
         Map<String, List<String>> map = new HashMap<>();
-        BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));
         String line;
-        while ((line = buffer.readLine()) != null) {  //  T=O(line), line - количество строк в файле
-            List<String> list = new ArrayList<>();
-            if (line.matches("([A-ZА-ЯЁa-zа-яё]+\\s*)+-\\s+([A-ZА-ЯЁa-zа-яё-]+\\s*)+\\d+"))
-            {
-                String trim = line.replaceAll("\\s+", " ").trim();
-                String person = trim.split(" - ")[0].trim();
-                String address = trim.split(" - ")[1].trim();
-                if (map.get(address) == null) {
-                    list.add(person);
-                    map.put(address, list);
-                } else {
-                    list = map.get(address);
-                    list.add(person);
-                    map.put(address,list);
-                }
-            } else throw new NumberFormatException("Некорректный ввод.");
+        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)))){
+            while ((line = buffer.readLine()) != null) {  //  T=O(line), line - количество строк в файле
+                List<String> list = new ArrayList<>();
+                if (line.matches("([A-ZА-ЯЁa-zа-яё]+\\s*)+-\\s+([A-ZА-ЯЁa-zа-яё-]+\\s*)+\\d+"))
+                {
+                    String trim = line.replaceAll("\\s+", " ").trim();
+                    String[] split = trim.split(" - ");
+                    String person = split[0].trim();
+                    String address = split[1].trim();
+                    if (map.get(address) == null) {
+                        list.add(person);
+                        map.put(address, list);
+                    } else {
+                        list = map.get(address);
+                        list.add(person);
+                    }
+                } else throw new IllegalArgumentException("Некорректный ввод.");
+            }
         }
 
-        List<String> addressList = new ArrayList<>(Arrays.asList(map.keySet().toArray(new String[map.keySet().size()])));
+        List<String> addressList = Arrays.asList(map.keySet().toArray(new String[map.keySet().size()]));
         Sorts.qckSort(addressList, true);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
 
-        for (String anAddressList : addressList) {  //  T=O(address) address - количество адресов в листе
-            StringBuilder str = new StringBuilder(anAddressList + " - ");
-            List<String> nameList = new ArrayList<>(map.get(anAddressList));
-            Sorts.qckSort(nameList, false);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
-            for (int j = 0; j < nameList.size(); j++) {  //  T=O(name) name - количество имён в листе
-                if (j != nameList.size() - 1) str.append(nameList.get(j)).append(", ");
-                else str.append(nameList.get(j));
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)))){
+            for (String anAddressList : addressList) {  //  T=O(address) address - количество адресов в листе
+                StringBuilder str = new StringBuilder(anAddressList + " - ");
+                List<String> nameList = new ArrayList<>(map.get(anAddressList));
+                Sorts.qckSort(nameList, false);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
+                for (int j = 0; j < nameList.size(); j++) {  //  T=O(name) name - количество имён в листе
+                    if (j != nameList.size() - 1) str.append(nameList.get(j)).append(", ");
+                    else str.append(nameList.get(j));
+                }
+                writer.write(str.toString());
+                writer.newLine();
             }
-            writer.write(str.toString());
-            writer.newLine();
         }
-
-        buffer.close();
-        writer.close();
     }  //  Вывод: T=O(n*log(n)), R=O(n)
 
     /**
@@ -140,22 +139,20 @@ public class JavaTasks {
      * 121.3
      */
     static public void sortTemperatures(String inputName, String outputName) throws IOException {
-        BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));
         String line;
-        int[] tempArray = new int[77300];
-        while ((line = buffer.readLine()) != null) tempArray[(int)(Double.parseDouble(line) * 10) + 2730]++;
-        //  T=O(line), line - количество строк в файле
-        for (int i = 0; i < tempArray.length; i++) {   //  T=O(n)
-            while (tempArray[i] != 0) {
-                writer.write(String.valueOf((double)(i - 2730) / 10));
-                writer.newLine();
-                tempArray[i]--;
+        int[] tempArray = new int[7731];
+        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));){
+            while ((line = buffer.readLine()) != null) tempArray[(int)(Double.parseDouble(line) * 10) + 2730]++;
+        }  //  T=O(line), line - количество строк в файле
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));){
+            for (int i = 0; i < tempArray.length; i++) {   //  T=O(n)
+                while (tempArray[i] != 0) {
+                    writer.write(String.valueOf((double)(i - 2730) / 10));
+                    writer.newLine();
+                    tempArray[i]--;
+                }
             }
         }
-
-        buffer.close();
-        writer.close();
     }  //  Вывод: T=O(n), R=O(1)
 
     /**
