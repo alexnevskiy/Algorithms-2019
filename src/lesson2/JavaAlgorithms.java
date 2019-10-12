@@ -130,8 +130,20 @@ public class JavaAlgorithms {
      * Единица простым числом не считается.
      */
     static public int calcPrimesNumber(int limit) {
-        throw new NotImplementedError();
-    }
+        int answer = 0;
+        boolean[] array = new boolean[limit + 1];
+        if (limit <= 1) return 0;
+        for (int i = 2; i <= limit; i++) array[i] = true;
+        for (int i = 2; i <= limit; i++) {
+            if (array[i]) {
+                for (int j = i; j <= limit; j += i) {
+                    array[j] = false;
+                }
+                answer++;
+            }
+        }
+        return answer;
+    }  //  Вывод: T=O(n(log(log(n))), R=O(n)
 
     /**
      * Балда
