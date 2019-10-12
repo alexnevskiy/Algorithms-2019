@@ -1,6 +1,7 @@
 package lesson1;
 
 import kotlin.NotImplementedError;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -68,7 +69,7 @@ public class JavaTasks {
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
     static public void sortAddresses(String inputName, String outputName) throws IOException {
-        Map<String, List<String>> map = new HashMap<>();
+        Map<Address, List<String>> map = new HashMap<>();
         String line;
         try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)))){
             while ((line = buffer.readLine()) != null) {  //  T=O(line), line - количество строк в файле
@@ -78,7 +79,7 @@ public class JavaTasks {
                     String trim = line.replaceAll("\\s+", " ").trim();
                     String[] split = trim.split(" - ");
                     String person = split[0].trim();
-                    String address = split[1].trim();
+                    Address address = new Address(split[1].trim());
                     if (map.get(address) == null) {
                         list.add(person);
                         map.put(address, list);
@@ -90,14 +91,14 @@ public class JavaTasks {
             }
         }
 
-        List<String> addressList = Arrays.asList(map.keySet().toArray(new String[map.keySet().size()]));
-        Sorts.qckSort(addressList, true);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
+        List<Address> addressList = new ArrayList<>(map.keySet());
+        Sorts.qckSort(addressList);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)))){
-            for (String anAddressList : addressList) {  //  T=O(address) address - количество адресов в листе
-                StringBuilder str = new StringBuilder(anAddressList + " - ");
+            for (Address anAddressList : addressList) {  //  T=O(address) address - количество адресов в листе
+                StringBuilder str = new StringBuilder(anAddressList.toString() + " - ");
                 List<String> nameList = new ArrayList<>(map.get(anAddressList));
-                Sorts.qckSort(nameList, false);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
+                Sorts.qckSort(nameList);  //  T=O(n*log(n))  Быстрая сортировка (Хоара)
                 for (int j = 0; j < nameList.size(); j++) {  //  T=O(name) name - количество имён в листе
                     if (j != nameList.size() - 1) str.append(nameList.get(j)).append(", ");
                     else str.append(nameList.get(j));
@@ -141,10 +142,10 @@ public class JavaTasks {
     static public void sortTemperatures(String inputName, String outputName) throws IOException {
         String line;
         int[] tempArray = new int[7731];
-        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)));){
+        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)))){
             while ((line = buffer.readLine()) != null) tempArray[(int)(Double.parseDouble(line) * 10) + 2730]++;
         }  //  T=O(line), line - количество строк в файле
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)));){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(outputName)))){
             for (int i = 0; i < tempArray.length; i++) {   //  T=O(n)
                 while (tempArray[i] != 0) {
                     writer.write(String.valueOf((double)(i - 2730) / 10));
@@ -204,5 +205,50 @@ public class JavaTasks {
      */
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
         throw new NotImplementedError();
+    }
+}
+
+/**
+ * Вспомогательный класс для решения задачи sortAddresses
+ */
+
+class Address implements Comparable<Address> {
+
+    private String address;
+    private int number;
+
+    Address(String input) {
+        address = input.split(" ")[0];
+        number = Integer.parseInt(input.split(" ")[1]);
+    }
+
+    @Override
+    public int compareTo(Address other) {
+        if (address.compareTo(other.address) > 0) return 1;
+        else if (address.compareTo(other.address) == 0) {
+            return Integer.compare(number, other.number);
+        } else return -1;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other instanceof Address) {
+            Address newOther = (Address) other;
+            return address.equals(newOther.address) && number == newOther.number;
+        }
+        return false;
+    }
+
+    @Override
+    public String toString() {
+        return address + " " + number;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = address.hashCode();
+        hash = 55 * hash + number;
+        return hash;
     }
 }
