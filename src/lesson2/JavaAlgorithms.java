@@ -3,6 +3,11 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
+import java.awt.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @SuppressWarnings("unused")
@@ -171,7 +176,46 @@ public class JavaAlgorithms {
      * В файле буквы разделены пробелами, строки -- переносами строк.
      * Остальные символы ни в файле, ни в словах не допускаются.
      */
-    static public Set<String> baldaSearcher(String inputName, Set<String> words) {
-        throw new NotImplementedError();
+    static public Set<String> baldaSearcher(String inputName, Set<String> words) throws IOException {
+        Set<String> set = new HashSet<>();
+        String line;
+        List<String[]> list = new ArrayList<>();
+
+        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)))) {
+            while ((line = buffer.readLine()) != null) list.add(line.split("\\s+"));
+        }
+
+        char[][] matrix = new char[list.size()][list.get(0).length];
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = 0; j < list.get(0).length; j++) {
+                matrix[i][j] = list.get(i)[j].charAt(0);
+            }
+        }
+
+        return set;
+    }
+}
+
+class Board {
+
+    private int row;
+    private int column;
+
+    Board(int rowId, int colId) {
+        row = rowId;
+        column = colId;
+    }
+
+    public boolean inRange(int rowId, int colId, int rowSize, int colSize) {
+        return 0 <= rowId && rowId < rowSize && 0 <= colId && colId < colSize;
+    }
+
+    public Board[] getNeighbours(int rowId, int colId) {
+        Board[] surrounding = new Board[4];
+        surrounding[0] = new Board(-1 + rowId, colId);
+        surrounding[1] = new Board(rowId, 1 + colId);
+        surrounding[2] = new Board(1 + rowId, colId);
+        surrounding[3] = new Board(rowId, -1 + colId);
+        return surrounding;
     }
 }
