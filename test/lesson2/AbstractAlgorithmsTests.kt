@@ -173,5 +173,9 @@ abstract class AbstractAlgorithmsTests {
                 )
             )
         )
+        assertEquals(
+            setOf("А", "КНИГА", "ПРИВЕТ"),
+            baldaSearcher("input/balda_in4.txt", setOf("ШАЛАШ", "КНИГА", "ПРИВЕТ", "А"))
+        )
     }
 }

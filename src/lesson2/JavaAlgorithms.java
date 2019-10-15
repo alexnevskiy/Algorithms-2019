@@ -181,41 +181,102 @@ public class JavaAlgorithms {
         String line;
         List<String[]> list = new ArrayList<>();
 
-        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)))) {
-            while ((line = buffer.readLine()) != null) list.add(line.split("\\s+"));
+        try (BufferedReader buffer = new BufferedReader(new FileReader(new File(inputName)))) {  //  Парсим строку и
+            while ((line = buffer.readLine()) != null) list.add(line.split("\\s+"));  //  добавляем в лист
         }
 
-        char[][] matrix = new char[list.size()][list.get(0).length];
-        for (int i = 0; i < list.size(); i++) {
-            for (int j = 0; j < list.get(0).length; j++) {
+        int numberOfRows = list.size();
+        int numberOfColumns = list.get(0).length;
+        char[][] matrix = new char[numberOfRows][numberOfColumns];
+        for (int i = 0; i < numberOfRows; i++) {  //  Заполняем матрицу чарами (буквами) из листа
+            for (int j = 0; j < numberOfColumns; j++) {  // T=O(i*j)
                 matrix[i][j] = list.get(i)[j].charAt(0);
             }
         }
 
+        Cell cell;
+        List<Cell> cellList = new ArrayList<>();
+        int numberOfLetters = 1;
+        for (String word: words) {
+            for (int i = 0; i < numberOfRows; i++) {
+                for (int j = 0; j < numberOfColumns; j++) {  //  T=O(i*j*w), где w - words (количество возможных слов)
+                    if (matrix[i][j] == word.charAt(0)) {  //  Делаем проверку на совпадение первой буквы слова
+                        cell = new Cell(i, j);
+                        if (cell.wordSearch(word, matrix, numberOfLetters, numberOfRows, numberOfColumns, cellList)) set.add(word);
+                        numberOfLetters = 1;  //  Сбрасываем количество знаков и лист до начальных значений после
+                        cellList.clear();  //  проверки каждой клетки
+                    }
+                }
+            }
+        }
         return set;
     }
-}
+}  //  Вывод: T=O(n*m*k), R=O(n*m), где n - ширина матрицы, m - высота, k - количество искомых слов
 
-class Board {
+/**
+ * Вспомогательный класс Cell для решения задачи про балду. Реализует клетку матрицы.
+ * В конструкторе используются координаты буквы, то есть индексы ряда и столбца в двумерном массиве.
+ *
+ * Реализованы методы:
+ *
+ * inRange(int rowSize, int colSize) - проверка на выход за границы матрицы
+ *
+ * getNeighbours(int rowSize, int colSize) - выводит массив из клеток, в которых может стоять следующая буква слова,
+ * то есть предполагаемые координаты
+ *
+ * wordSearch(String word, char[][] matrix, int numberOfLetters, int width, int high, List<Cell> list) - самый важный
+ * метод в данном классе, который реализует поиск слова по чарам в матрице
+ */
+
+class Cell {
 
     private int row;
     private int column;
 
-    Board(int rowId, int colId) {
+    Cell(int rowId, int colId) {
         row = rowId;
         column = colId;
     }
 
-    public boolean inRange(int rowId, int colId, int rowSize, int colSize) {
-        return 0 <= rowId && rowId < rowSize && 0 <= colId && colId < colSize;
+    public boolean inRange(int rowSize, int colSize) {
+        return 0 <= row && row < rowSize && 0 <= column && column < colSize;
     }
 
-    public Board[] getNeighbours(int rowId, int colId) {
-        Board[] surrounding = new Board[4];
-        surrounding[0] = new Board(-1 + rowId, colId);
-        surrounding[1] = new Board(rowId, 1 + colId);
-        surrounding[2] = new Board(1 + rowId, colId);
-        surrounding[3] = new Board(rowId, -1 + colId);
+    public Cell[] getNeighbours(int rowId, int colId) {  //  Создаём массив из клеток, которые расположены
+        Cell[] surrounding = new Cell[4];  //  в таком порядке относительно буквы в матрице (по часовой стрелке):
+        surrounding[0] = new Cell(-1 + rowId, colId);  //  Сверху
+        surrounding[1] = new Cell(rowId, 1 + colId);  //  Справа
+        surrounding[2] = new Cell(1 + rowId, colId);  //  Снизу
+        surrounding[3] = new Cell(rowId, -1 + colId);  //  Слева
         return surrounding;
+    }
+
+    public boolean wordSearch(String word, char[][] matrix, int numberOfLetters, int width, int high, List<Cell> list) {
+        if (numberOfLetters == word.length()) return true;  //  Проверка на длину слова и количество букв, которые
+        numberOfLetters++;  //  уже обработаны
+        Cell[] surrounding = this.getNeighbours(row, column);
+        for (Cell side: surrounding) {  //  Проходимся по соседним клеткам от буквы, на которой был вызван метод
+            if (side.inRange(width, high) && matrix[side.row][side.column] == word.charAt(numberOfLetters - 1)
+                    && !list.contains(side)) {  //  Если клетка не за пределами матрицы, буква в ней равна следующей
+                list.add(this);  // букве в слове и позиция клетки ещё не была использована в данной проверке, то
+                if (side.wordSearch(word, matrix, numberOfLetters, width, high, list)) return true;  //  добавляем её
+            }  //  в лист и запускаем этот же метод, но уже на следующую букву слова
+        }
+        return false;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) return true;
+        if (other instanceof Cell) {
+            Cell newOther = (Cell) other;
+            return row == (newOther.row) && column == newOther.column;
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return (row + column) * 55;
     }
 }
