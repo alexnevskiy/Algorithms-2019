@@ -242,19 +242,19 @@ class Cell {
         return 0 <= row && row < rowSize && 0 <= column && column < colSize;
     }
 
-    public Cell[] getNeighbours(int rowId, int colId) {  //  Создаём массив из клеток, которые расположены
+    public Cell[] getNeighbours() {  //  Создаём массив из клеток, которые расположены
         Cell[] surrounding = new Cell[4];  //  в таком порядке относительно буквы в матрице (по часовой стрелке):
-        surrounding[0] = new Cell(-1 + rowId, colId);  //  Сверху
-        surrounding[1] = new Cell(rowId, 1 + colId);  //  Справа
-        surrounding[2] = new Cell(1 + rowId, colId);  //  Снизу
-        surrounding[3] = new Cell(rowId, -1 + colId);  //  Слева
+        surrounding[0] = new Cell(-1 + row, column);  //  Сверху
+        surrounding[1] = new Cell(row, 1 + column);  //  Справа
+        surrounding[2] = new Cell(1 + row, column);  //  Снизу
+        surrounding[3] = new Cell(row, -1 + column);  //  Слева
         return surrounding;
     }
 
     public boolean wordSearch(String word, char[][] matrix, int numberOfLetters, int width, int high, List<Cell> list) {
         if (numberOfLetters == word.length()) return true;  //  Проверка на длину слова и количество букв, которые
         numberOfLetters++;  //  уже обработаны
-        Cell[] surrounding = this.getNeighbours(row, column);
+        Cell[] surrounding = this.getNeighbours();
         for (Cell side: surrounding) {  //  Проходимся по соседним клеткам от буквы, на которой был вызван метод
             if (side.inRange(width, high) && matrix[side.row][side.column] == word.charAt(numberOfLetters - 1)
                     && !list.contains(side)) {  //  Если клетка не за пределами матрицы, буква в ней равна следующей
