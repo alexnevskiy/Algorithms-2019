@@ -3,12 +3,9 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
-import java.awt.*;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Set;
 
 @SuppressWarnings("unused")
 public class JavaAlgorithms {
@@ -211,7 +208,7 @@ public class JavaAlgorithms {
         }
         return set;
     }
-}  //  Вывод: T=O(n*m*k), R=O(n*m), где n - ширина матрицы, m - высота, k - количество искомых слов
+}  //  Вывод: T=O(n*m*k*3^(n*m)), R=O(n*m), где n - ширина матрицы, m - высота, k - количество искомых слов
 
 /**
  * Вспомогательный класс Cell для решения задачи про балду. Реализует клетку матрицы.
@@ -262,9 +259,9 @@ class Cell {
                 if (side.wordSearch(word, matrix, numberOfLetters, width, high, list)) return true;  //  добавляем её
             }  //  в лист и запускаем этот же метод, но уже на следующую букву слова
         }
-        return false;
-    }
-
+        return false;  //  T=O(3^(n*m))  В начале рекурсии у нас есть все 4 стороны, далее при переходе на следующую
+    }  //  букву прошлая будет одной из 4 сторон, куда мы можем пойти, соответственно, в неё мы никогда не попадём,
+  //  отсюда получается, что остаётся всегда лишь 3 стороны для проверки на совпадение
     @Override
     public boolean equals(Object other) {
         if (this == other) return true;
@@ -277,6 +274,6 @@ class Cell {
 
     @Override
     public int hashCode() {
-        return (row + column) * 55;
+        return Objects.hash(row, column);
     }
 }
