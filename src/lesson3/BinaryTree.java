@@ -74,8 +74,44 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      */
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        if (find((T) o) == null) return false;  //  Делаем проверку на вхождение элемента в дерево
+        root = remove(root, new Node<>((T) o));
+        size--;  //  Уменьшаем количество элементов при успешном удалении
+        return true;
+    }
+
+    /**
+     * Вспомогательная функция
+     * Удаление элемента в поддереве
+     * Реализовано рекурсией
+     *
+     * Рассматривается 3 случая:
+     * 1) Удаляемый элемент находится в левом поддереве текущего поддерева
+     * 2) Удаляемый элемент находится в правом поддереве текущего поддерева
+     * 3) Удаляемый элемент является корнем поддерева
+     *
+     * В двух первых случаях рекурсивно удаляется элемент из нужного поддерева.
+     * Если удаляемый элемент находится в корне текущего поддерева и имеет два узла,
+     * то нужно заменить его минимальным элементом из правого поддерева и рекурсивно
+     * удалить этот минимальный элемент из правого поддерева.
+     * Если удаляемый элемент имеет один узел, то он им и заменяется.
+     */
+    private Node<T> remove(Node<T> start, Node<T> removable) {
+        if (start == null) return null;
+        if (removable.value.compareTo(start.value) < 0) start.left = remove(start.left, removable);
+        else if (removable.value.compareTo(start.value) > 0) start.right = remove(start.right, removable);
+        else if (start.left != null && start.right != null) {
+            Node<T> node;
+            node = new Node<>(minimum(start.right));
+            node.left = start.left;
+            node.right = start.right;
+            start = node;
+            start.right = remove(start.right, start);
+        } else {
+            if (start.left != null) start = start.left;
+            else start = start.right;
+        }
+        return start;
     }
 
     @Override
@@ -208,6 +244,32 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public T last() {
         if (root == null) throw new NoSuchElementException();
         Node<T> current = root;
+        while (current.right != null) {
+            current = current.right;
+        }
+        return current.value;
+    }
+
+    /**
+     * Вспомогательная функция
+     * Нахождение минимального элемента в поддереве
+     */
+    public T minimum(Node<T> node) {
+        if (node == null) throw new NoSuchElementException();
+        Node<T> current = node;
+        while (current.left != null) {
+            current = current.left;
+        }
+        return current.value;
+    }
+
+    /**
+     * Вспомогательная функция
+     * Нахождение максимального элемента в поддереве
+     */
+    public T maximum(Node<T> node) {
+        if (node == null) throw new NoSuchElementException();
+        Node<T> current = node;
         while (current.right != null) {
             current = current.right;
         }
