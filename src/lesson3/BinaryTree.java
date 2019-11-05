@@ -78,7 +78,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         root = remove(root, new Node<>((T) o));
         size--;  //  Уменьшаем количество элементов при успешном удалении
         return true;
-    }
+    }  //  Вывод: Т=O(h), R=O(1), где h - высота бинарного дерева
 
     /**
      * Вспомогательная функция
@@ -91,18 +91,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * 3) Удаляемый элемент является корнем поддерева
      *
      * В двух первых случаях рекурсивно удаляется элемент из нужного поддерева.
-     * Если удаляемый элемент находится в корне текущего поддерева и имеет два узла,
+     * Если удаляемый элемент является корнем текущего поддерева и имеет два узла,
      * то нужно заменить его минимальным элементом из правого поддерева и рекурсивно
      * удалить этот минимальный элемент из правого поддерева.
      * Если удаляемый элемент имеет один узел, то он им и заменяется.
      */
     private Node<T> remove(Node<T> start, Node<T> removable) {
         if (start == null) return null;
-        if (removable.value.compareTo(start.value) < 0) start.left = remove(start.left, removable);
-        else if (removable.value.compareTo(start.value) > 0) start.right = remove(start.right, removable);
-        else if (start.left != null && start.right != null) {
-            Node<T> node;
-            node = new Node<>(minimum(start.right));
+        if (removable.value.compareTo(start.value) < 0) start.left = remove(start.left, removable);  //  Удаление слева
+        else if (removable.value.compareTo(start.value) > 0) start.right = remove(start.right, removable);  //  Удаление справа
+        else if (start.left != null && start.right != null) {  //  Удаление элемента при двух узлах с непустыми значениями
+            Node<T> node;  //  Используется переменная узла, так как value является final
+            node = new Node<>(minimum(start.right));  //  Поиск минимального элемента в правом поддереве (вспом. функ.)
             node.left = start.left;
             node.right = start.right;
             start = node;
