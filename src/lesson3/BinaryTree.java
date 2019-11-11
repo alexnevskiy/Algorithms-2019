@@ -214,7 +214,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         return size;
     }
 
-
     @Nullable
     @Override
     public Comparator<? super T> comparator() {
@@ -228,9 +227,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        // TODO
-        throw new NotImplementedError();
-    }
+        return new SubBinaryTree(this, fromElement, toElement, true, true);
+    }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
     /**
      * Найти множество всех элементов меньше заданного
@@ -239,9 +237,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        // TODO
-        throw new NotImplementedError();
-    }
+        return new SubBinaryTree(this, this.first(), toElement, false, true);
+    }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
     /**
      * Найти множество всех элементов больше или равных заданного
@@ -250,9 +247,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        // TODO
-        throw new NotImplementedError();
-    }
+        return new SubBinaryTree(this, fromElement, null, true, false);
+    }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
     @Override
     public T first() {
@@ -298,5 +294,83 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             current = current.right;
         }
         return current.value;
+    }
+
+    /**
+     * Вложенный класс, реализующий поддерево, которое ограничено либо снизу,
+     * либо сверху, либо с двух сторон одновременно.
+     * Является классом-обёрткой, так как мы работаем с тем же самым бинарным деревом,
+     * а не новым его экземпляром.
+     *
+     * Переменные:
+     * binaryTree - бинарное дерево, с которым мы работаем
+     * fromElement - нижняя граница, которая ограничивает поддерево (элемент включается в дерево)
+     * toElement - верхняя граница, которая ограничивает поддерево (элемент не включается в дерево)
+     * bottomLimit - переменная, которая отвечает за наличие нижней границы
+     * upperLimit - переменная, которая отвечает за наличие верхней границы
+     *
+     * bottomLimit и upperLimit добавлены для реализации деревьев, которые ограничены только
+     * с одной стороны (методы headSet() и tailSet())
+     *
+     * Переопределены методы add(), contains() и size() из родительского класса.
+     */
+    class SubBinaryTree extends BinaryTree<T> {
+        private BinaryTree<T> binaryTree;
+        private final T fromElement;
+        private final T toElement;
+        private boolean bottomLimit;
+        private boolean upperLimit;
+        private int size = 0;
+
+        SubBinaryTree(BinaryTree<T> binaryTree, T fromElement, T toElement, boolean bottomLimit, boolean upperLimit) {
+            this.binaryTree = binaryTree;
+            this.fromElement = fromElement;
+            this.toElement = toElement;
+            this.bottomLimit = bottomLimit;
+            this.upperLimit = upperLimit;
+        }
+
+        @Override
+        public boolean add(T t) {
+            if (!inRange(t)) throw new IllegalArgumentException();
+            return binaryTree.add(t);
+        }
+
+        @Override
+        public boolean contains(Object o) {
+            if (!inRange((T) o)) return false;
+            return binaryTree.contains(o);
+        }
+
+        @Override
+        public int size() {
+            int counter = 0;
+            for (T value : binaryTree) if (inRange(value)) counter++;
+            size = counter;
+            return size;
+        }
+
+        /**
+         * Вспомогательная функция
+         * Проверка на вхождение в поддерево
+         * Реализовано при помощи переменных bottomLimit и upperLimit при создании объекта класса
+         *
+         * Алгоритм:
+         * Задаём две переменные comparisonBottom и comparisonTop,
+         * которые отвечают за сравнение по нижней границе и по верхней,
+         * присваиваем им 0 и -1 соответственно для того,
+         * чтобы при false в bottomLimit или upperLimit не учитывалась граница поддерева,
+         * если нам это требуется (методы headSet() и tailSet()).
+         * Далее присваиваем значение сравнения через compareTo между элементом и границей
+         * в comparisonBottom и comparisonTop соответственно,
+         * если поля класса bottomLimit и upperLimit равны true.
+         */
+        private boolean inRange(T t) {
+            int comparisonBottom = 0;
+            int comparisonTop = -1;
+            if (bottomLimit) comparisonBottom = t.compareTo(fromElement);
+            if (upperLimit) comparisonTop = t.compareTo(toElement);
+            return comparisonBottom >= 0 && comparisonTop < 0;
+        }
     }
 }
