@@ -88,6 +88,32 @@ abstract class AbstractHeadTailTest {
         assertEquals(13, tree.size)
     }
 
+    protected fun doHeadSetRemoveTest() {  //  Продолжаем работать с тем же деревом из doHeadSetRelationTest (tree.size = 13)
+        val set: SortedSet<Int> = tree.headSet(9)
+        assertEquals(10, set.size)
+        assertEquals(13, tree.size)
+        tree.add(-10)
+        assertTrue(set.contains(-10))
+        set.add(-20)
+        assertTrue(tree.contains(-20))
+        tree.add(30)
+        assertFalse(set.contains(30))
+        assertFailsWith<IllegalArgumentException> { set.add(9) }
+        assertEquals(12, set.size)
+        assertEquals(16, tree.size)
+        tree.remove(12)
+        assertFalse(tree.contains(12))
+        set.remove(5)
+        assertFalse(set.contains(5))
+        tree.remove(4)
+        assertFalse(set.contains(4))
+        set.remove(1)
+        assertFalse(tree.contains(1))
+        assertFailsWith<IllegalArgumentException> { set.add(12) }
+        assertEquals(9, set.size)
+        assertEquals(12, tree.size)
+    }
+
     protected fun doTailSetRelationTest() {
         val set: SortedSet<Int> = tree.tailSet(4)
         assertEquals(7, set.size)
@@ -101,6 +127,32 @@ abstract class AbstractHeadTailTest {
         assertFailsWith<IllegalArgumentException> { set.add(-2) }
         assertEquals(9, set.size)
         assertEquals(13, tree.size)
+    }
+
+    protected fun doTailSetRemoveTest() {  //  Продолжаем работать с тем же деревом из doTailSetRelationTest (tree.size = 13)
+        val set: SortedSet<Int> = tree.tailSet(7)
+        assertEquals(6, set.size)
+        assertEquals(13, tree.size)
+        tree.add(100)
+        assertTrue(set.contains(100))
+        set.add(150)
+        assertTrue(tree.contains(150))
+        tree.add(-33)
+        assertFalse(set.contains(-33))
+        assertFailsWith<IllegalArgumentException> { set.add(6) }
+        assertEquals(8, set.size)
+        assertEquals(16, tree.size)
+        tree.remove(0)
+        assertFalse(tree.contains(0))
+        set.remove(10)
+        assertFalse(set.contains(10))
+        tree.remove(7)
+        assertFalse(set.contains(7))
+        set.remove(42)
+        assertFalse(tree.contains(42))
+        assertFailsWith<IllegalArgumentException> { set.add(0) }
+        assertEquals(5, set.size)
+        assertEquals(12, tree.size)
     }
 
     protected fun doSubSetTest() {
@@ -186,5 +238,5 @@ abstract class AbstractHeadTailTest {
         assertFailsWith<IllegalArgumentException> { set.remove(15) }
         assertEquals(4, set.size)
         assertEquals(10, tree.size)
-    }
+    }  //  Все тесты на удаление элементов из поддерева подходят и для всех реализованных до этого методов
 }
