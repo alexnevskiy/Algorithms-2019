@@ -151,4 +151,40 @@ abstract class AbstractHeadTailTest {
         assertEquals(14, tree.size)
     }
 
+    protected fun doSubSetRemoveTest() {  //  Продолжаем работать с тем же деревом из doSubSetRelationTest (tree.size = 14)
+        val smallSet: SortedSet<Int> = tree.subSet(4, 8)
+        assertEquals(false, smallSet.contains(1))
+        assertEquals(false, smallSet.contains(2))
+        assertEquals(false, smallSet.contains(3))
+        assertEquals(true, smallSet.contains(4))
+        assertEquals(true, smallSet.contains(5))
+        assertEquals(true, smallSet.contains(6))
+        assertEquals(true, smallSet.contains(7))
+        assertEquals(false, smallSet.contains(8))
+        assertEquals(false, smallSet.contains(9))
+        assertEquals(false, smallSet.contains(10))
+
+        assertFailsWith<IllegalArgumentException> { smallSet.add(2) }
+        assertFailsWith<IllegalArgumentException> { smallSet.add(9) }
+        assertFailsWith<IllegalArgumentException> { smallSet.remove(15) }
+        assertFailsWith<IllegalArgumentException> { smallSet.remove(8) }
+
+        val set: SortedSet<Int> = tree.subSet(5, 15)
+        assertEquals(8, set.size)
+        assertEquals(14, tree.size)
+        set.remove(10)
+        assertFalse(set.contains(10))
+        tree.remove(5)
+        assertFalse(tree.contains(5))
+        set.remove(8)
+        assertFalse(tree.contains(8))
+        tree.remove(7)
+        assertFalse(set.contains(7))
+        assertFailsWith<IllegalArgumentException> { set.add(1) }
+        assertFailsWith<IllegalArgumentException> { set.add(20) }
+        assertFailsWith<IllegalArgumentException> { set.remove(4) }
+        assertFailsWith<IllegalArgumentException> { set.remove(15) }
+        assertEquals(4, set.size)
+        assertEquals(10, tree.size)
+    }
 }

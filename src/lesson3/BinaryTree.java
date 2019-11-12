@@ -343,6 +343,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         }
 
         @Override
+        public boolean remove(Object o) {
+            if (!inRange((T) o)) throw new IllegalArgumentException();
+            return binaryTree.remove(o);
+        }
+
+        @Override
         public int size() {
             int counter = 0;
             for (T value : binaryTree) if (inRange(value)) counter++;
