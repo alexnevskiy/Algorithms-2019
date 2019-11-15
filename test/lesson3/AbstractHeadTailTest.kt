@@ -218,8 +218,8 @@ abstract class AbstractHeadTailTest {
 
         assertFailsWith<IllegalArgumentException> { smallSet.add(2) }
         assertFailsWith<IllegalArgumentException> { smallSet.add(9) }
-        assertFailsWith<IllegalArgumentException> { smallSet.remove(15) }
-        assertFailsWith<IllegalArgumentException> { smallSet.remove(8) }
+        assertEquals(false, smallSet.remove(10))
+        assertEquals(false, smallSet.remove(8))
 
         val set: SortedSet<Int> = tree.subSet(5, 15)
         assertEquals(8, set.size)
@@ -234,8 +234,8 @@ abstract class AbstractHeadTailTest {
         assertFalse(set.contains(7))
         assertFailsWith<IllegalArgumentException> { set.add(1) }
         assertFailsWith<IllegalArgumentException> { set.add(20) }
-        assertFailsWith<IllegalArgumentException> { set.remove(4) }
-        assertFailsWith<IllegalArgumentException> { set.remove(15) }
+        assertEquals(false, set.remove(4))
+        assertEquals(false, set.remove(15))
         assertEquals(4, set.size)
         assertEquals(10, tree.size)
     }  //  Все тесты на удаление элементов из поддерева подходят и для всех реализованных до этого методов

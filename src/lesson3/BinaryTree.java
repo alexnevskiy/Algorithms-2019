@@ -145,33 +145,18 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public class BinaryTreeIterator implements Iterator<T> {
 
         private Node<T> node = null;  //  Текущий элемент в итераторе
-        private Queue<Node<T>> iterator = new LinkedList<>();  //  Очередь в качестве коллекции для реализации итератора
+        private Node<T> previous = null;
+        private Stack<Node<T>> stackOfParents = new Stack<>();
 
         private BinaryTreeIterator() {
             if (root == null) return;
-            createIterator(root);
+            node = root;
+            stackOfParents.push(null);
+            while (node.left != null) {
+                stackOfParents.push(node);
+                node = node.left;
+            }
         }
-
-        /**
-         * Вспомогательная функция
-         * Заполнение итератора для бинарного дерева в порядке увеличения значения
-         * Реализовано рекурсией
-         *
-         * Алгоритм:
-         * Ищем минимальное значение начиная с корня бинарного дерева рекурсией,
-         * то есть проверяем на null каждый левый элемент. Как только самый малый элемент найден,
-         * добавляем его в конец очереди. Далее начинается заполнение всеми последующими элементами.
-         * Проверяем правый элемент на null, так как мы находимся в самой левой ячейке левого поддерева,
-         * то цикл завершается и возвращается в предыдущий вызов, добавляется элемент в очередь
-         * и совершается проверка опять же на null справа, если справа есть элемент, то выполняется метод,
-         * добавляется элемент в очередь, в зависимости от правого элемента либо вызывается метод снова,
-         * либо возвращается в прошлый, и, таким образом, обходится всё дерево.
-         */
-        private void createIterator(Node<T> current) {
-            if (current.left != null) createIterator(current.left);
-            iterator.offer(current);
-            if (current.right != null) createIterator(current.right);
-        }  //  Вывод: Т=O(e), R=O(e), где e - количество элементов в дереве
 
         /**
          * Проверка наличия следующего элемента
@@ -179,8 +164,8 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public boolean hasNext() {
-            return iterator.peek() != null;
-        }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
+            return node != null;
+        }  //  Вывод: Т=O(1), R=O(1)
 
         /**
          * Поиск следующего элемента
@@ -188,9 +173,9 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            node = iterator.poll();
-            if (node == null) throw new NoSuchElementException();
-            return node.value;
+            previous = node;
+            node = findNext(node);
+            return previous.value;
         }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
         /**
@@ -199,8 +184,53 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            BinaryTree.this.remove(node.value);
+            BinaryTree.this.remove(previous.value);
+            while (!stackOfParents.empty()) {
+                stackOfParents.pop();
+            }
+            stackOfParents.push(null);
+            if (node == null) return;
+            node = findWithParents(root, node.value);
         }  //  Вывод: Т=O(h), R=O(1), где h - высота бинарного дерева
+
+        private Node<T> findNext(Node<T> node) {
+            if (node.right != null) {
+                stackOfParents.push(node);
+                return minimumWithParents(node.right);
+            }
+            Node<T> parent = stackOfParents.pop();
+            while (parent != null && node == parent.right) {
+                node = parent;
+                parent = stackOfParents.pop();
+            }
+            return parent;
+        }
+
+        private Node<T> findWithParents(Node<T> start, T value) {
+            int comparison = value.compareTo(start.value);
+            if (comparison == 0) {
+                return start;
+            }
+            else if (comparison < 0) {
+                stackOfParents.push(start);
+                if (start.left == null) return start;
+                return findWithParents(start.left, value);
+            }
+            else {
+                stackOfParents.push(start);
+                if (start.right == null) return start;
+                return findWithParents(start.right, value);
+            }
+        }
+
+        private Node<T> minimumWithParents(Node<T> node) {
+            if (node == null) throw new NoSuchElementException();
+            while (node.left != null) {
+                stackOfParents.push(node);
+                node = node.left;
+            }
+            return node;
+        }
     }
 
     @NotNull
@@ -227,7 +257,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        return new SubBinaryTree(this, fromElement, toElement, true, true);
+        return new SubBinaryTree(this, fromElement, toElement);
     }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
     /**
@@ -237,7 +267,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        return new SubBinaryTree(this, this.first(), toElement, false, true);
+        return new SubBinaryTree(this, null, toElement);
     }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
     /**
@@ -247,7 +277,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        return new SubBinaryTree(this, fromElement, null, true, false);
+        return new SubBinaryTree(this, fromElement, null);
     }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
 
     @Override
@@ -306,11 +336,6 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * binaryTree - бинарное дерево, с которым мы работаем
      * fromElement - нижняя граница, которая ограничивает поддерево (элемент включается в дерево)
      * toElement - верхняя граница, которая ограничивает поддерево (элемент не включается в дерево)
-     * bottomLimit - переменная, которая отвечает за наличие нижней границы
-     * upperLimit - переменная, которая отвечает за наличие верхней границы
-     *
-     * bottomLimit и upperLimit добавлены для реализации деревьев, которые ограничены только
-     * с одной стороны (методы headSet() и tailSet())
      *
      * Переопределены методы add(), contains() и size() из родительского класса.
      */
@@ -318,16 +343,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         private BinaryTree<T> binaryTree;
         private final T fromElement;
         private final T toElement;
-        private boolean bottomLimit;
-        private boolean upperLimit;
         private int size = 0;
 
-        SubBinaryTree(BinaryTree<T> binaryTree, T fromElement, T toElement, boolean bottomLimit, boolean upperLimit) {
+        SubBinaryTree(BinaryTree<T> binaryTree, T fromElement, T toElement) {
             this.binaryTree = binaryTree;
             this.fromElement = fromElement;
             this.toElement = toElement;
-            this.bottomLimit = bottomLimit;
-            this.upperLimit = upperLimit;
         }
 
         @Override
@@ -344,7 +365,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
         @Override
         public boolean remove(Object o) {
-            if (!inRange((T) o)) throw new IllegalArgumentException();
+            if (!inRange((T) o)) return false;
             return binaryTree.remove(o);
         }
 
@@ -359,23 +380,23 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         /**
          * Вспомогательная функция
          * Проверка на вхождение в поддерево
-         * Реализовано при помощи переменных bottomLimit и upperLimit при создании объекта класса
+         * Реализовано при помощи проверки границ на null
          *
          * Алгоритм:
          * Задаём две переменные comparisonBottom и comparisonTop,
          * которые отвечают за сравнение по нижней границе и по верхней,
          * присваиваем им 0 и -1 соответственно для того,
-         * чтобы при false в bottomLimit или upperLimit не учитывалась граница поддерева,
+         * чтобы при false в проверка на null не учитывалась граница поддерева,
          * если нам это требуется (методы headSet() и tailSet()).
          * Далее присваиваем значение сравнения через compareTo между элементом и границей
          * в comparisonBottom и comparisonTop соответственно,
-         * если поля класса bottomLimit и upperLimit равны true.
+         * если проверка на null равна true.
          */
         private boolean inRange(T t) {
             int comparisonBottom = 0;
             int comparisonTop = -1;
-            if (bottomLimit) comparisonBottom = t.compareTo(fromElement);
-            if (upperLimit) comparisonTop = t.compareTo(toElement);
+            if (fromElement != null) comparisonBottom = t.compareTo(fromElement);
+            if (toElement != null) comparisonTop = t.compareTo(toElement);
             return comparisonBottom >= 0 && comparisonTop < 0;
         }
     }
