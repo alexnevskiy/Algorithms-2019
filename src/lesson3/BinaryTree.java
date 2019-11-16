@@ -145,14 +145,14 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     public class BinaryTreeIterator implements Iterator<T> {
 
         private Node<T> node = null;  //  Текущий элемент в итераторе
-        private Node<T> previous = null;
-        private Stack<Node<T>> stackOfParents = new Stack<>();
+        private Node<T> previous = null;  //  Предыдущий элемент в итераторе
+        private Stack<Node<T>> stackOfParents = new Stack<>();  //  Стэк хранящий всех родителей для текущего элемента
 
         private BinaryTreeIterator() {
             if (root == null) return;
             node = root;
-            stackOfParents.push(null);
-            while (node.left != null) {
+            stackOfParents.push(null);  //  Добавляем в начало стэка null, чтобы при окончании итерации node был равен null
+            while (node.left != null) {  //  Заполнение стэка родителями для первого элемента
                 stackOfParents.push(node);
                 node = node.left;
             }
@@ -176,7 +176,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             previous = node;
             node = findNext(node);
             return previous.value;
-        }  //  Вывод: Т=O(e), R=O(1), где e - количество элементов в дереве
+        }  //  Вывод: Т=O(h), R=O(1), где h - высота бинарного дерева
 
         /**
          * Удаление следующего элемента
@@ -184,15 +184,31 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public void remove() {
-            BinaryTree.this.remove(previous.value);
-            while (!stackOfParents.empty()) {
+            BinaryTree.this.remove(previous.value);  //  Удаление элемента в самом бинарном дереве
+            while (!stackOfParents.empty()) {  //  Опусташаем стэк, для его переопределения для нового текущего элемента
                 stackOfParents.pop();
             }
             stackOfParents.push(null);
-            if (node == null) return;
-            node = findWithParents(root, node.value);
+            if (node == null) return;  //  Если элемент является последним, то есть null, то метод завершается, чтобы
+            node = findWithParents(root, node.value);  //  не искать родителей для null(иначе вылетает экспешн)
         }  //  Вывод: Т=O(h), R=O(1), где h - высота бинарного дерева
 
+        /**
+         * Вспомогательная функция
+         * Поиск следующего элемента в дереве с заполнением стэка с родителями
+         *
+         * Алгоритм:
+         * Рассматривается два случая:
+         * 1) Следующий элемент находится в правом поддереве относительно текущего элемента
+         * 2) Следующий элемент находится выше в дереве
+         *
+         * Для первого случая смотрим, есть ли у текущего элемента справа потомок.
+         * Если есть, то добавляем текущий элемент в стэк и запускаем поиск минимального
+         * элемента с добавлением родителей.
+         * Для второго случая создаём переменную, хранящую ячейку родителя, и, пока элемент справа
+         * не перестанет быть равным текущему элементу, происходит переприсваивание переменных:
+         * Текущему элементу присваивается его родитель, а родителю элемент выше(тоже родитель).
+         */
         private Node<T> findNext(Node<T> node) {
             if (node.right != null) {
                 stackOfParents.push(node);
@@ -206,6 +222,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             return parent;
         }
 
+        /**
+         * Вспомогательная функция
+         * Поиск элемента с заполнением стэка родителями
+         * Реализовано рекурсией
+         * Тот же самый find(), только ещё добавляет родителей для искомого элемента в стэк.
+         */
         private Node<T> findWithParents(Node<T> start, T value) {
             int comparison = value.compareTo(start.value);
             if (comparison == 0) {
@@ -223,6 +245,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             }
         }
 
+        /**
+         * Вспомогательная функция
+         * Поиск минимального элемента с заполнением стэка родителями
+         * Является тем же самым minimum(), только с добавлением родителей в стэк.
+         */
         private Node<T> minimumWithParents(Node<T> node) {
             if (node == null) throw new NoSuchElementException();
             while (node.left != null) {
