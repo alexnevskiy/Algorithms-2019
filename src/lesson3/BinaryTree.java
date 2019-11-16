@@ -331,7 +331,7 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Вспомогательная функция
      * Нахождение минимального элемента в поддереве
      */
-    public T minimum(Node<T> node) {
+    private T minimum(Node<T> node) {
         if (node == null) throw new NoSuchElementException();
         Node<T> current = node;
         while (current.left != null) {
@@ -404,6 +404,12 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             return size;
         }
 
+        @NotNull
+        @Override
+        public Iterator<T> iterator() {
+            return new SubBinaryTreeIterator();
+        }
+
         /**
          * Вспомогательная функция
          * Проверка на вхождение в поддерево
@@ -425,6 +431,92 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             if (fromElement != null) comparisonBottom = t.compareTo(fromElement);
             if (toElement != null) comparisonTop = t.compareTo(toElement);
             return comparisonBottom >= 0 && comparisonTop < 0;
+        }
+
+        /**
+         * Вложенный класс, реализующий итератор для SubBinaryTree
+         * Это всё тот же самый итератор для BinaryTree, только с одним небольшим изменением,
+         * а именно проверкой inRange(T t) в методе hasNext().
+         * Трудоёмкость и ресурсоёмкость такие же, как и для BinaryTreeIterator.
+         * Написаны отдельные тесты для данного итератора.
+         */
+        public class SubBinaryTreeIterator extends BinaryTreeIterator {
+
+            private Node<T> node = null;
+            private Node<T> previous = null;
+            private Stack<Node<T>> stackOfParents = new Stack<>();
+
+            private SubBinaryTreeIterator() {
+                if (root == null) return;
+                node = root;
+                stackOfParents.push(null);
+                while (node.left != null) {
+                    stackOfParents.push(node);
+                    node = node.left;
+                }
+            }
+
+            @Override
+            public boolean hasNext() {
+                return node != null && inRange(node.value);
+            }
+
+            @Override
+            public T next() {
+                previous = node;
+                node = findNext(node);
+                return previous.value;
+            }
+
+            @Override
+            public void remove() {
+                SubBinaryTree.this.remove(previous.value);
+                while (!stackOfParents.empty()) {
+                    stackOfParents.pop();
+                }
+                stackOfParents.push(null);
+                if (node == null) return;
+                node = findWithParents(root, node.value);
+            }
+
+            private Node<T> findNext(Node<T> node) {
+                if (node.right != null) {
+                    stackOfParents.push(node);
+                    return minimumWithParents(node.right);
+                }
+                Node<T> parent = stackOfParents.pop();
+                while (parent != null && node == parent.right) {
+                    node = parent;
+                    parent = stackOfParents.pop();
+                }
+                return parent;
+            }
+
+            private Node<T> findWithParents(Node<T> start, T value) {
+                int comparison = value.compareTo(start.value);
+                if (comparison == 0) {
+                    return start;
+                }
+                else if (comparison < 0) {
+                    stackOfParents.push(start);
+                    if (start.left == null) return start;
+                    return findWithParents(start.left, value);
+                }
+                else {
+                    stackOfParents.push(start);
+                    if (start.right == null) return start;
+                    return findWithParents(start.right, value);
+                }
+            }
+
+            private Node<T> minimumWithParents(Node<T> node) {
+                if (node == null) throw new NoSuchElementException();
+                while (node.left != null) {
+                    stackOfParents.push(node);
+                    node = node.left;
+                }
+                return node;
+            }
         }
     }
 }

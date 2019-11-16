@@ -6,6 +6,8 @@ import kotlin.test.Test
 
 class JavaHeadSetTest : AbstractHeadTailTest() {
 
+    private fun <T : Comparable<T>> createJavaTree(): CheckableSortedSet<T> = BinaryTree()
+
     @BeforeEach
     fun fillTree() {
         fillTree { BinaryTree() }
@@ -43,5 +45,12 @@ class JavaHeadSetTest : AbstractHeadTailTest() {
         doSubSetTest()
         doSubSetRelationTest()
         doSubSetRemoveTest()
+    }
+
+    @Test
+    @Tag("Impossible")
+    fun subSetIteratorTest() {
+        testIterator { createJavaTree() }
+        testIteratorRemove { createJavaTree() }
     }
 }
