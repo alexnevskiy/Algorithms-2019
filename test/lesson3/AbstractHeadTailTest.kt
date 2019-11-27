@@ -239,4 +239,86 @@ abstract class AbstractHeadTailTest {
         assertEquals(4, set.size)
         assertEquals(10, tree.size)
     }  //  Все тесты на удаление элементов из поддерева подходят и для всех реализованных до этого методов
+
+    protected fun testIterator(create: () -> CheckableSortedSet<Int>) {
+        val random = Random()
+        for (iteration in 1..20) {
+            val list = mutableListOf<Int>()
+            for (i in 1..20) {
+                list.add(random.nextInt(100))
+            }
+            val treeSet = TreeSet<Int>()
+            val binarySet = create()
+            assertFalse(
+                binarySet.subSet(0, 100).iterator().hasNext(),
+                "Iterator of empty set should not have next element"
+            )
+            for (element in list) {
+                treeSet += element
+                binarySet += element
+            }
+            val randomSize = random.nextInt(100)
+            val treeIt = treeSet.subSet(0, randomSize).iterator()
+            val binaryIt = binarySet.subSet(0, randomSize).iterator()
+            println("Traversing $list")
+            while (binaryIt.hasNext()) {
+                assertEquals(treeIt.next(), binaryIt.next(), "Incorrect iterator state while iterating $treeSet")
+            }
+            val iterator1 = binarySet.subSet(0, randomSize).iterator()
+            val iterator2 = binarySet.subSet(0, randomSize).iterator()
+            println("Consistency check for hasNext $list")
+            // hasNext call should not affect iterator position
+            while (iterator1.hasNext()) {
+                assertEquals(
+                    iterator2.next(), iterator1.next(),
+                    "Call of iterator.hasNext() changes its state while iterating $treeSet"
+                )
+            }
+        }
+    }
+
+    protected fun testIteratorRemove(create: () -> CheckableSortedSet<Int>) {
+        val random = Random()
+        for (iteration in 1..100) {
+            val list = mutableListOf<Int>()
+            for (i in 1..20) {
+                list.add(random.nextInt(100))
+            }
+            val treeSet = TreeSet<Int>()
+            val binarySet = create()
+            for (element in list) {
+                treeSet += element
+                binarySet += element
+            }
+            val toRemove = list[random.nextInt(list.size)]
+            treeSet.remove(toRemove)
+            println("Removing $toRemove from $list")
+            val iterator = binarySet.subSet(0, toRemove + 1).iterator()
+            var counter = binarySet.subSet(0, toRemove + 1).size
+            while (iterator.hasNext()) {
+                val element = iterator.next()
+                counter--
+                print("$element ")
+                if (element == toRemove) {
+                    iterator.remove()
+                }
+            }
+            assertEquals(
+                0, counter,
+                "Iterator.remove() of $toRemove from $list changed iterator position: " +
+                        "we've traversed a total of ${binarySet.size - counter} elements instead of ${binarySet.size}"
+            )
+            println()
+            assertEquals<SortedSet<*>>(treeSet, binarySet, "After removal of $toRemove from $list")
+            assertEquals(treeSet.size, binarySet.size, "Size is incorrect after removal of $toRemove from $list")
+            for (element in list) {
+                val inn = element != toRemove
+                assertEquals(
+                    inn, element in binarySet,
+                    "$element should be ${if (inn) "in" else "not in"} tree"
+                )
+            }
+            assertTrue(binarySet.checkInvariant(), "Binary tree invariant is false after tree.iterator().remove()")
+        }
+    }
 }
