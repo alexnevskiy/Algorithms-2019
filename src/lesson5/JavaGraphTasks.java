@@ -2,8 +2,7 @@ package lesson5;
 
 import kotlin.NotImplementedError;
 
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaGraphTasks {
@@ -118,8 +117,29 @@ public class JavaGraphTasks {
      * J ------------ K
      *
      * Ответ: A, E, J, K, D, C, H, G, B, F, I
+     *
+     * Алгоритм:
+     * Рассматриваем все возможные пути в графе. Сначала добавляем в очередь все вершины графа,
+     * далее рассматриваем все возможные пути: если длина текущего пути больше, чем у самого длинного,
+     * то запоминаем текущий путь как самый длинный и присваиваем его длину. Затем для вершины
+     * в конце текущего пути ищем соседей, которые ещё не были добавлены, и добавляем их соответственно.
+     * Таким образом, рассматриваются все возможные варианты путей в графе, и запоминается самый длинный из них.
      */
     public static Path longestSimplePath(Graph graph) {
-        throw new NotImplementedError();
-    }
+        Queue<Path> queueOfPaths = new LinkedList<>();
+        Path longestSimplePath = new Path();
+        int length = -1;
+        for (Graph.Vertex vertex : graph.getVertices()) queueOfPaths.offer(new Path(vertex));
+        while (!queueOfPaths.isEmpty()) {
+            Path path = queueOfPaths.poll();
+            if (path.getLength() > length) {
+                longestSimplePath = path;
+                length = path.getLength();
+            }
+            for (Graph.Vertex neighbour : graph.getNeighbors(path.getVertices().get(path.getLength()))) {
+                if (!path.contains(neighbour)) queueOfPaths.offer(new Path(path, graph, neighbour));
+            }
+        }
+        return longestSimplePath;
+    }  //  Вывод: Т=O(v!), R=O(v!), где v - количество вершин в графе
 }
