@@ -93,10 +93,35 @@ public class JavaGraphTasks {
      * Если на входе граф с циклами, бросить IllegalArgumentException
      *
      * Эта задача может быть зачтена за пятый и шестой урок одновременно
+     *
+     * Алгоритм:
+     * Проходимся по всем рёбрам графа. Сначала создаём сэт из всех ребёр графа и два пустых сета,
+     * где будут храниться два возможных максимально независимых множества вершин (чётные и нечётные множества).
+     * Реализованы эти два сета через LinkedHashSet, так как при нескольких самых больших множествах,
+     * приоритет имеет то из них, в котором вершины расположены раньше во множестве graph.getVertices(), начиная с первых.
+     * Далее при проходе по всем рёбрам графа создаём переменные, реализующие начало и конец ребра.
+     * Далее делаем проверку на наличие цикла в графе и заполняем сеты вершинами.
+     * В конце выводится сет с большим количеством вершин.
      */
     public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
-        throw new NotImplementedError();
-    }
+        Set<Graph.Edge> edges = graph.getEdges();
+        Set<Graph.Vertex> evenVertices = new LinkedHashSet<>();
+        Set<Graph.Vertex> unevenVertices = new LinkedHashSet<>();
+        for (Graph.Edge edge : edges) {
+            Graph.Vertex begin = edge.getBegin();
+            Graph.Vertex end = edge.getEnd();
+            if (evenVertices.contains(begin) && unevenVertices.contains(end)
+                    || evenVertices.contains(end) && unevenVertices.contains(begin))
+                throw new IllegalArgumentException();
+            if (!unevenVertices.contains(begin) && !evenVertices.contains(end)) {
+                evenVertices.add(begin);
+                unevenVertices.add(end);
+            } else if (unevenVertices.contains(begin)) evenVertices.add(end);
+            else unevenVertices.add(begin);
+        }
+        if (evenVertices.size() >= unevenVertices.size()) return evenVertices;
+        else return unevenVertices;
+    }  //  Вывод: Т=O(e), R=O(ve), где v - количество вершин в графе, e - количество рёбер в графе
 
     /**
      * Наидлиннейший простой путь.
