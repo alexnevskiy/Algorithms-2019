@@ -121,7 +121,7 @@ public class JavaGraphTasks {
         }
         if (evenVertices.size() >= unevenVertices.size()) return evenVertices;
         else return unevenVertices;
-    }  //  Вывод: Т=O(e), R=O(ve), где v - количество вершин в графе, e - количество рёбер в графе
+    }  //  Вывод: Т=O(e), R=O(v), где v - количество вершин в графе, e - количество рёбер в графе
 
     /**
      * Наидлиннейший простой путь.
