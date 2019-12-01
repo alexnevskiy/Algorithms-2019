@@ -94,19 +94,42 @@ public class JavaGraphTasks {
      *
      * Эта задача может быть зачтена за пятый и шестой урок одновременно
      *
-     * Алгоритм:
-     * Проходимся по всем рёбрам графа. Сначала создаём сэт из всех ребёр графа и два пустых сета,
+     * Код можно условно разделить на две части:
+     * 1. Поиск в графе цикла с выбрасыванием IllegalArgumentException
+     * 2. Сам поиск максимального независимого множества вершин в графе с выводом ответа
+     *
+     * Алгоритм для 1 части кода:
+     * Проходимся по всем рёбрам графа. Сначала создаём сет из всех ребёр графа и два пустых сета,
      * где будут храниться два возможных максимально независимых множества вершин (чётные и нечётные множества).
-     * Реализованы эти два сета через LinkedHashSet, так как при нескольких самых больших множествах,
-     * приоритет имеет то из них, в котором вершины расположены раньше во множестве graph.getVertices(), начиная с первых.
      * Далее при проходе по всем рёбрам графа создаём переменные, реализующие начало и конец ребра.
-     * Далее делаем проверку на наличие цикла в графе и заполняем сеты вершинами.
-     * В конце выводится сет с большим количеством вершин.
+     * Затем делаем проверку на наличие цикла в графе и заполняем сеты вершинами.
+     *
+     * Алгоритм для 2 части кода:
+     * Проходимся по всем вершинам графа. Создаём два сета для подходящих вершин и неподходящих соответственно.
+     * В каждой итерации цикла будем отталкиваться от вершины, с которой мы работаем на данной итерации.
+     * Далее проходимся по всем вершинам ещё раз и сравниваем, является ли другая вершина (other) соседом основной
+     * вершины (vertex) и не присутствует ли она в сете из неподходящих вершин. Если по всем критериями other
+     * проходит, то она добавляется в сет из подходящих вершин, а все её соседи в сет из неподходящих.
+     * Так проходимся по всем другим вершинам и в конце добавляем итоговый сет в лист для дальнейшей обработки ответа.
+     *
+     * После обхода всего графа выявляем подходящий сет с максимальным независимым множеством вершин.
+     * Сначала делаем проверку по размеру сета, а затем делаем хитрую проверку по хэшкоду, ведь
+     * в задании написано "Если самых больших множеств несколько, приоритет имеет то из них, в котором вершины
+     * расположены раньше во множестве this.vertices (начиная с первых).", а чем меньше хэшкод у сета, тем раньше
+     * его элементы распологаются в this.vertices.
+     *
+     *
+     * P.S.
+     * Решил использовать LinkedHashSet лишь для наглядности и удобства составления тестов, а так HashSet
+     * конечно же будет эффективнее.
      */
     public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
+        List<Set<Graph.Vertex>> allPossibleSets = new ArrayList<>();
+        Set<Graph.Vertex> largestIndependentVertexSet = new LinkedHashSet<>();
+
         Set<Graph.Edge> edges = graph.getEdges();
-        Set<Graph.Vertex> evenVertices = new LinkedHashSet<>();
-        Set<Graph.Vertex> unevenVertices = new LinkedHashSet<>();
+        Set<Graph.Vertex> evenVertices = new HashSet<>();
+        Set<Graph.Vertex> unevenVertices = new HashSet<>();
         for (Graph.Edge edge : edges) {
             Graph.Vertex begin = edge.getBegin();
             Graph.Vertex end = edge.getEnd();
@@ -119,9 +142,26 @@ public class JavaGraphTasks {
             } else if (unevenVertices.contains(begin)) evenVertices.add(end);
             else unevenVertices.add(begin);
         }
-        if (evenVertices.size() >= unevenVertices.size()) return evenVertices;
-        else return unevenVertices;
-    }  //  Вывод: Т=O(e), R=O(v), где v - количество вершин в графе, e - количество рёбер в графе
+
+        for (Graph.Vertex vertex : graph.getVertices()) {
+            Set<Graph.Vertex> matchingVertices = new LinkedHashSet<>();
+            Set<Graph.Vertex> remainingVertices = new LinkedHashSet<>();
+            for (Graph.Vertex other : graph.getVertices()) {
+                if (!graph.getNeighbors(vertex).contains(other) && !remainingVertices.contains(other)) {
+                    matchingVertices.add(other);
+                    remainingVertices.addAll(graph.getNeighbors(other));
+                }
+            }
+            allPossibleSets.add(matchingVertices);
+        }
+        for (Set<Graph.Vertex> set : allPossibleSets) {
+            if (largestIndependentVertexSet.size() < set.size()) largestIndependentVertexSet = set;
+            if (largestIndependentVertexSet.size() == set.size()
+                    && set.hashCode() < largestIndependentVertexSet.hashCode()) largestIndependentVertexSet = set;
+        }
+        return largestIndependentVertexSet;
+    }  //  Вывод: Т=O(v^2), R=O(a), где v - количество вершин в графе, a - все возможные независимые множества вершин
+    // в графе (allPossibleSets)
 
     /**
      * Наидлиннейший простой путь.

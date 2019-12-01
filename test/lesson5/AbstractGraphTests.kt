@@ -358,6 +358,83 @@ abstract class AbstractGraphTests {
         assertFailsWith<IllegalArgumentException> {
             cycle2.largestIndependentVertexSet()
         }
+        //    A           E
+        //    |           |
+        //    B --- C --- D
+        //                |
+        //    H --- G --- F
+        //    |
+        //    I --- J --- K
+        //                |
+        //    N --- M --- L
+        //    |
+        //    O --- P --- Q
+        //                |
+        //    T --- S --- R
+        //    |           |
+        //    U           V
+        val snake = GraphBuilder().apply {
+            val a = addVertex("A")
+            val b = addVertex("B")
+            val c = addVertex("C")
+            val d = addVertex("D")
+            val e = addVertex("E")
+            val f = addVertex("F")
+            val g = addVertex("G")
+            val h = addVertex("H")
+            val i = addVertex("I")
+            val j = addVertex("J")
+            val k = addVertex("K")
+            val l = addVertex("L")
+            val m = addVertex("M")
+            val n = addVertex("N")
+            val o = addVertex("O")
+            val p = addVertex("P")
+            val q = addVertex("Q")
+            val r = addVertex("R")
+            val s = addVertex("S")
+            val t = addVertex("T")
+            val u = addVertex("U")
+            val v = addVertex("V")
+            addConnection(a, b)
+            addConnection(b, c)
+            addConnection(c, d)
+            addConnection(d, e)
+            addConnection(d, f)
+            addConnection(f, g)
+            addConnection(g, h)
+            addConnection(h, i)
+            addConnection(i, j)
+            addConnection(j, k)
+            addConnection(k, l)
+            addConnection(l, m)
+            addConnection(m, n)
+            addConnection(n, o)
+            addConnection(o, p)
+            addConnection(p, q)
+            addConnection(q, r)
+            addConnection(r, v)
+            addConnection(r, s)
+            addConnection(s, t)
+            addConnection(t, u)
+        }.build()
+        assertEquals(
+            setOf(
+                snake["A"],
+                snake["C"],
+                snake["E"],
+                snake["F"],
+                snake["H"],
+                snake["J"],
+                snake["L"],
+                snake["N"],
+                snake["P"],
+                snake["S"],
+                snake["U"],
+                snake["V"]
+            ),
+            snake.largestIndependentVertexSet()
+        )
     }
 
     fun longestSimplePath(longestSimplePath: Graph.() -> Path) {
