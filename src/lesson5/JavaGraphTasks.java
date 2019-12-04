@@ -113,15 +113,12 @@ public class JavaGraphTasks {
      * Так проходимся по всем другим вершинам и в конце добавляем итоговый сет в лист для дальнейшей обработки ответа.
      *
      * После обхода всего графа выявляем подходящий сет с максимальным независимым множеством вершин.
-     * Сначала делаем проверку по размеру сета, а затем делаем хитрую проверку по хэшкоду, ведь
-     * в задании написано "Если самых больших множеств несколько, приоритет имеет то из них, в котором вершины
-     * расположены раньше во множестве this.vertices (начиная с первых).", а чем меньше хэшкод у сета, тем раньше
-     * его элементы распологаются в this.vertices.
-     *
-     *
-     * P.S.
-     * Решил использовать LinkedHashSet лишь для наглядности и удобства составления тестов, а так HashSet
-     * конечно же будет эффективнее.
+     * Делаем проверку по размеру сета:
+     * Если размер нового сета больше, чем размер самого большого, то переприсваиваем сет и
+     * переходим к следующему;
+     * Если же размеры равны, то создаём итераторы для сетов и экземпляр вспомогательного класса Comparator.
+     * Далее проходимся по всем вершинам в сете и сравниваем их индексы во множестве this.vertices и если
+     * элемент в новом сете находится раньше, чем в самом большом, то переприсваиваем сет.
      */
     public static Set<Graph.Vertex> largestIndependentVertexSet(Graph graph) {
         List<Set<Graph.Vertex>> allPossibleSets = new ArrayList<>();
@@ -145,7 +142,7 @@ public class JavaGraphTasks {
 
         for (Graph.Vertex vertex : graph.getVertices()) {
             Set<Graph.Vertex> matchingVertices = new LinkedHashSet<>();
-            Set<Graph.Vertex> remainingVertices = new LinkedHashSet<>();
+            Set<Graph.Vertex> remainingVertices = new HashSet<>();
             for (Graph.Vertex other : graph.getVertices()) {
                 if (!graph.getNeighbors(vertex).contains(other) && !remainingVertices.contains(other)) {
                     matchingVertices.add(other);
@@ -155,13 +152,52 @@ public class JavaGraphTasks {
             allPossibleSets.add(matchingVertices);
         }
         for (Set<Graph.Vertex> set : allPossibleSets) {
-            if (largestIndependentVertexSet.size() < set.size()) largestIndependentVertexSet = set;
-            if (largestIndependentVertexSet.size() == set.size()
-                    && set.hashCode() < largestIndependentVertexSet.hashCode()) largestIndependentVertexSet = set;
+            if (largestIndependentVertexSet.size() < set.size()) {
+                largestIndependentVertexSet = set;
+                continue;
+            }
+            if (largestIndependentVertexSet.size() == set.size()) {
+                Iterator largestIterator = largestIndependentVertexSet.iterator();
+                Iterator currentIterator = set.iterator();
+                Comparator comparator = new Comparator(graph);
+                while (largestIterator.hasNext()) {
+                    Graph.Vertex largestVertex = (Graph.Vertex) largestIterator.next();
+                    Graph.Vertex currentVertex = (Graph.Vertex) currentIterator.next();
+                    if (comparator.compare(largestVertex, currentVertex) < 0) break;
+                    if (comparator.compare(largestVertex, currentVertex) > 0) largestIndependentVertexSet = set;
+                }
+            }
         }
         return largestIndependentVertexSet;
     }  //  Вывод: Т=O(v^2), R=O(a), где v - количество вершин в графе, a - все возможные независимые множества вершин
     // в графе (allPossibleSets)
+
+    /**
+     * Вспомогательный класс, реализующий компаратор для Graph.Vertex
+     *
+     * Метод indexMap() добавляет в map вершины с их индексами во множестве вершин this.vertices
+     */
+    private static class Comparator {
+        private Map<Graph.Vertex, Integer> map;
+
+        private Comparator(Graph graph) {
+            map = indexMap(graph);
+        }
+
+        private Map<Graph.Vertex, Integer> indexMap(Graph graph) {
+            Map<Graph.Vertex, Integer> map = new HashMap<>();
+            int counter = 0;
+            for (Graph.Vertex vertex : graph.getVertices()) {
+                map.put(vertex, counter);
+                counter++;
+            }
+            return map;
+        }
+
+        private int compare(Graph.Vertex vertex1, Graph.Vertex vertex2) {
+            return map.get(vertex1).compareTo(map.get(vertex2));
+        }
+    }
 
     /**
      * Наидлиннейший простой путь.
