@@ -242,5 +242,5 @@ public class JavaGraphTasks {
             }
         }
         return longestSimplePath;
-    }  //  Вывод: Т=O(v!), R=O(v!), где v - количество вершин в графе
-}
+    }  //  Вывод: Т=O(q*n), R=O(q), где q - количество всех возможных путей в графе (queueOfPaths), n - количество
+}  //  соседей у вершины
